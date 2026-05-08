@@ -1,4 +1,4 @@
-# Awesome degoog extensions
+# Degoog Community Extensions
 
 A quick showcase of community store repositories for [degoog](https://github.com/fccview/degoog).
 

@@ -16,12 +16,12 @@ export const initSlider = (container, urls) => {
   prev.type = "button";
   prev.className = "ade-slider-nav ade-slider-prev";
   prev.setAttribute("aria-label", "Previous screenshot");
-  prev.textContent = "<";
+  prev.textContent = '<i class="fa-solid fa-chevron-left"></i>';
   const next = document.createElement("button");
   next.type = "button";
   next.className = "ade-slider-nav ade-slider-next";
   next.setAttribute("aria-label", "Next screenshot");
-  next.textContent = ">";
+  next.textContent = '<i class="fa-solid fa-chevron-right"></i>';
   const counter = document.createElement("span");
   counter.className = "ade-slider-counter";
   const dots = document.createElement("div");

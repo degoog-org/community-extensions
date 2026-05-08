@@ -6,13 +6,20 @@ export const THEME_KEY = "ade:theme";
 export const REFRESH_KEY = "ade:lastRefresh";
 export const REFRESH_COOLDOWN_MS = 30 * 1000;
 
-export const TYPES = ["plugins", "themes", "engines", "transports"];
+export const TYPES = [
+  "plugins",
+  "themes",
+  "engines",
+  "transports",
+  "autocompletes",
+];
 
 export const TYPE_LABELS = {
   plugins: "Plugins",
   themes: "Themes",
   engines: "Engines",
   transports: "Transports",
+  autocompletes: "Autocompletes",
 };
 
 export const TYPE_SINGULAR = {
@@ -20,6 +27,7 @@ export const TYPE_SINGULAR = {
   themes: "theme",
   engines: "engine",
   transports: "transport",
+  autocomplete: "autocomplete",
 };
 
 export const IMG_EXT = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
