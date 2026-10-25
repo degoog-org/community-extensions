@@ -12,3 +12,5 @@ services:
       - ./store.html:/usr/share/nginx/html/store.html:ro
       - ./extension.html:/usr/share/nginx/html/extension.html:ro
       - ./assets:/usr/share/nginx/html/assets:ro
+      - ./data:/usr/share/nginx/html/data:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro

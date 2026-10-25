@@ -1,0 +1,53 @@
+name: Deploy site
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Index stores
+        id: index
+        run: node scripts/indexer/index.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PREVIOUS_CATALOG_URL: https://degoog-org.github.io/community-extensions/data/catalog.json
+
+      - name: Assemble site
+        if: github.event_name != 'schedule' || steps.index.outputs.changed == 'true'
+        run: |
+          mkdir -p _site
+          cp -r index.html store.html extension.html stores.json assets data _site/
+          touch _site/.nojekyll
+
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'schedule' || steps.index.outputs.changed == 'true'
+        with:
+          path: _site
+
+      - id: deployment
+        if: github.event_name != 'schedule' || steps.index.outputs.changed == 'true'
+        uses: actions/deploy-pages@v4

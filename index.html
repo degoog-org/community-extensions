@@ -3,91 +3,93 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Awesome degoog extensions</title>
+    <meta name="description" content="Browse community plugins, themes, engines and more for degoog, the self-hosted search aggregator." />
+    <meta name="theme-color" content="#25272e" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f1f1f1" media="(prefers-color-scheme: light)" />
+    <title>degoog community extensions</title>
     <script>
       (function () {
         try {
-          var t = localStorage.getItem("ade:theme");
-          if (t !== "light" && t !== "dark") {
-            t = window.matchMedia("(prefers-color-scheme: dark)").matches
-              ? "dark"
-              : "light";
-          }
-          document.documentElement.setAttribute("data-theme", t);
+          var t = localStorage.getItem("dce:theme");
+          if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
         } catch (e) {}
       })();
     </script>
-    <link
-      rel="icon"
-      href="https://github.com/fccview/degoog/raw/main/src/public/images/degoog-logo.png"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
-    />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-    />
-    <link rel="stylesheet" href="assets/style.css?bust=cache" />
+    <link rel="icon" href="assets/images/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="32x32" href="assets/images/favicon-32x32.png" />
+    <link rel="apple-touch-icon" href="assets/images/apple-touch-icon.png" />
+    <link rel="preload" href="assets/fonts/inter.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="assets/icons/fontawesome/css/all.min.css" />
+    <link rel="stylesheet" href="assets/css/tokens.css?v=3" />
+    <link rel="stylesheet" href="assets/css/base.css?v=3" />
+    <link rel="stylesheet" href="assets/css/layout.css?v=3" />
+    <link rel="stylesheet" href="assets/css/filter-bar.css?v=3" />
+    <link rel="stylesheet" href="assets/css/store.css?v=3" />
+    <link rel="stylesheet" href="assets/css/pages.css?v=3" />
+    <link rel="stylesheet" href="assets/css/markdown.css?v=3" />
+    <script defer src="assets/vendor/marked.min.js"></script>
+    <script defer src="assets/vendor/purify.min.js"></script>
+    <script type="module" src="assets/js/main.js?v=3"></script>
   </head>
   <body>
-    <div class="dce-layout">
-      <header class="dce-mobile-header">
-        <button id="dce-burger" type="button" class="dce-btn dce-btn-burger">
-          <i class="fa-solid fa-bars"></i>
-        </button>
-        <div class="dce-mobile-title-container">
-          <a href="/community-extensions" class="dce-mobile-title-link">
-            <span class="dce-mobile-title">Degoog community extensions</span>
-          </a>
+    <div class="settings-page">
+      <div class="settings-layout">
+        <div class="settings-sidebar">
+          <header class="settings-page-header">
+            <h1 class="settings-page-title"><a href="#/">Degoog Community Extensions</a></h1>
+            <p class="settings-page-sub">
+              Plugins, themes, engines and more for
+              <a href="https://github.com/fccview/degoog" target="_blank" rel="noopener noreferrer">degoog</a>, made by the degoog
+              community.
+            </p>
+          </header>
+
+          <div class="settings-nav-mobile">
+            <div class="degoog-select-wrap">
+              <select id="nav-select" class="settings-tab-select" aria-label="Section">
+                <option value="store">Store</option>
+                <option value="submit">Submit a store</option>
+                <option value="ext:https://degoog-org.github.io/docs/">Documentation</option>
+                <option value="ext:https://github.com/fccview/degoog">degoog on GitHub</option>
+              </select>
+            </div>
+            <button type="button" class="theme-btn" data-theme-toggle aria-label="Switch theme">
+              <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>
+            </button>
+          </div>
+
+          <nav class="settings-nav" aria-label="Sections">
+            <a class="settings-nav-item" data-nav="store" href="#/">
+              <i class="fa-solid fa-store" aria-hidden="true"></i>Store
+            </a>
+            <a class="settings-nav-item" data-nav="submit" href="#/submit">
+              <i class="fa-solid fa-plus" aria-hidden="true"></i>Submit a store
+            </a>
+            <div class="settings-nav-sep" role="separator"></div>
+            <a class="settings-nav-item" href="https://degoog-org.github.io/docs/" target="_blank" rel="noopener noreferrer">
+              <i class="fa-solid fa-book" aria-hidden="true"></i>Documentation
+              <i class="fa-solid fa-arrow-up-right-from-square settings-nav-ext" aria-hidden="true"></i>
+            </a>
+            <a class="settings-nav-item" href="https://github.com/fccview/degoog" target="_blank" rel="noopener noreferrer">
+              <i class="fa-brands fa-github" aria-hidden="true"></i>degoog on GitHub
+              <i class="fa-solid fa-arrow-up-right-from-square settings-nav-ext" aria-hidden="true"></i>
+            </a>
+            <div class="settings-nav-sep" role="separator"></div>
+            <button type="button" class="settings-nav-item" data-theme-toggle aria-label="Switch theme">
+              <i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i><span data-theme-label>System theme</span>
+            </button>
+          </nav>
         </div>
-      </header>
-      <div class="dce-content">
-        <aside class="dce-sidebar">
-          <div class="dce-sidebar-brand">
-            <img
-              src="https://github.com/fccview/degoog/raw/main/src/public/images/degoog-logo.png"
-              alt="degoog logo"
-              class="dce-brand-img"
-              onerror="this.style.display = 'none'"
-            />
-            <a href="/community-extensions" class="dce-brand-name"
-              >Degoog Community Extensions</a
-            >
-          </div>
-          <div class="dce-sidebar-search">
-            <input
-              id="dce-search"
-              class="dce-input"
-              type="search"
-              placeholder="Search all extensions..."
-              autocomplete="off"
-            />
-          </div>
-          <nav id="dce-nav" class="dce-nav" aria-label="Stores"></nav>
-          <div class="dce-sidebar-actions">
-            <button id="dce-refresh" type="button" class="dce-btn">
-              <i class="fa-solid fa-arrows-rotate"></i>
-            </button>
-            <button id="dce-theme-toggle" type="button" class="dce-btn">
-              <i class="fa-solid fa-circle-half-stroke"></i>
-            </button>
-          </div>
-        </aside>
-        <main id="dce-main" class="dce-main"></main>
+
+        <main id="main" class="settings-page-main" tabindex="-1"></main>
       </div>
-      <div id="dce-backdrop" class="dce-backdrop"></div>
+
+      <footer class="site-foot">
+        Community stores are not reviewed by the degoog team. Installing an extension runs its code on your server, so
+        only install what you trust. Source on
+        <a href="https://github.com/degoog-org/community-extensions" target="_blank" rel="noopener noreferrer">GitHub</a>.
+      </footer>
     </div>
-    <dialog id="dce-lightbox" class="dce-lightbox">
-      <button type="button" class="dce-lightbox-close" aria-label="Close">
-        &times;
-      </button>
-      <img alt="" />
-    </dialog>
-    <script src="assets/libraries/marked.min.js"></script>
-    <script type="module" src="assets/js/main.js"></script>
+    <noscript><p class="site-error">This catalog needs JavaScript to browse extensions.</p></noscript>
   </body>
 </html>

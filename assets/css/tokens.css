@@ -1,38 +1,89 @@
+@font-face {
+  font-family: "Inter";
+  src: url("../fonts/inter.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
-  --dce-border-w: 0.0625rem;
+  --font: "Inter", arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "Liberation Mono", Menlo, Monaco, Consolas, monospace;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.75rem;
+  --radius-pill: 1.5rem;
+  --transition-fast: 0.2s ease;
+  --transition-med: 0.3s ease;
+  --box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+  --tooltip-bg: #1a1a1a;
+  --tooltip-text: #fff;
+}
 
-  --dce-space-1: 0.0625rem;
-  --dce-space-2: 0.125rem;
-  --dce-space-3: 0.1875rem;
-  --dce-space-4: 0.25rem;
-  --dce-space-5: 0.3125rem;
-  --dce-space-6: 0.375rem;
-  --dce-space-8: 0.5rem;
-  --dce-space-10: 0.625rem;
-  --dce-space-11: 0.6875rem;
-  --dce-space-12: 0.75rem;
-  --dce-space-14: 0.875rem;
-  --dce-space-16: 1rem;
-  --dce-space-18: 1.125rem;
-  --dce-space-20: 1.25rem;
-  --dce-space-22: 1.375rem;
-  --dce-space-24: 1.5rem;
-  --dce-space-28: 1.75rem;
-  --dce-space-32: 2rem;
-  --dce-space-40: 2.5rem;
-  --dce-space-44: 2.75rem;
-  --dce-space-56: 3.5rem;
-  --dce-space-60: 3.75rem;
-  --dce-space-72: 4.5rem;
+:root,
+:root[data-theme="light"] {
+  --primary: #5673ac;
+  --primary-hover: #3b547c;
+  --primary-rgb: 66, 133, 244;
+  --brand-blue: #4285f4;
+  --brand-yellow: #fbbc05;
+  --danger: #ea4335;
+  --warning: #c17d00;
+  --success: #34a853;
+  --bg: #f1f1f1;
+  --bg-light: #fafafa;
+  --bg-hover: #fafafa;
+  --border: #c8d0da;
+  --border-light: #dedede;
+  --text-primary: #343536;
+  --text-secondary: #4b5563;
+  --text-link: #1a0dab;
+  --text-link-visited: #681da8;
+  --overlay-bg: rgba(0, 0, 0, 0.4);
+  --white: #fff;
+  color-scheme: light;
+}
 
-  --dce-font-11: 0.6875rem;
-  --dce-font-12: 0.75rem;
-  --dce-font-13: 0.8125rem;
-  --dce-font-14: 0.875rem;
-  --dce-font-18: 1.125rem;
-  --dce-font-22: 1.375rem;
-  --dce-font-28: 1.75rem;
-  --dce-font-32: 2rem;
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --primary: #5673ac;
+    --primary-hover: #3b547c;
+    --warning: #fbbc05;
+    --bg: #25272e;
+    --bg-light: #303134;
+    --bg-hover: #3c4043;
+    --border: #5f6368;
+    --border-light: #303134;
+    --text-primary: #dddddd;
+    --text-secondary: #9aa0a6;
+    --text-link: #8ab4f8;
+    --text-link-visited: #c58af9;
+    --overlay-bg: rgba(0, 0, 0, 0.6);
+    --white: #fff3f3;
+    color-scheme: dark;
+  }
+}
 
-  --dce-sidebar-width: 18.75rem;
+:root[data-theme="dark"] {
+  --primary: #5673ac;
+  --primary-hover: #3b547c;
+  --warning: #fbbc05;
+  --bg: #25272e;
+  --bg-light: #303134;
+  --bg-hover: #3c4043;
+  --border: #5f6368;
+  --border-light: #303134;
+  --text-primary: #dddddd;
+  --text-secondary: #9aa0a6;
+  --text-link: #8ab4f8;
+  --text-link-visited: #c58af9;
+  --overlay-bg: rgba(0, 0, 0, 0.6);
+  --white: #fff3f3;
+  color-scheme: dark;
+}
+
+:root {
+  --btn-secondary-hover: color-mix(in srgb, var(--text-primary) 26%, var(--bg));
 }

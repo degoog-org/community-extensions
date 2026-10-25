@@ -14,18 +14,19 @@ Stores with avatar/screenshots and well thought out descriptions will have a hig
 
 GitHub, Codeberg, and GitLab.com are supported out of the box.
 
-Self-hosted **Gitea** and **Forgejo** instances work without any code changes, the site detects them automatically by probing `/api/v1/version` on first encounter (the result is cached for 7 days).
+Self-hosted **Gitea** and **Forgejo** instances work without any code changes, they're detected automatically by probing `/api/v1/version`.
 
 The instance just needs to expose its API publicly with CORS (default Gitea/Forgejo config does).
 
-To add support for a different git host (sourcehut, BitBucket, etc.), [open a PR](https://github.com/fccview/awesome-degoog-extensions/compare) adding a fetcher to [`assets/js/utils/fetchers.js`](./assets/js/utils/fetchers.js). A fetcher is a small object with these fields:
+To add support for a different git host (sourcehut, BitBucket, etc.), [open a PR](https://github.com/fccview/awesome-degoog-extensions/compare) adding a host to [`scripts/indexer/hosts`](./scripts/indexer/hosts). A host is a small object with these fields:
 
-- `host` — short identifier (e.g. `"github"`)
-- `label` — human-readable name
-- `matches(hostname)` — returns true for hostnames this fetcher handles
-- `buildLoc(path)` — returns `{ webUrl, gitUrl, displayUrl }`
-- `getTree(loc)` — returns `{ paths, ref, sha }` for the repo tree
-- `rawUrl(loc, tree, path)` — returns a **CORS-enabled** URL for fetching a file
-- `sourceUrl(loc, tree, extPath)` — returns a URL to view the folder on the host
+- `id`, short identifier (e.g. `"github"`)
+- `label`, human-readable name
+- `matches(hostname)`, returns true for hostnames this host handles
+- `locate(hostname, path)`, returns `{ hostname, path, webUrl, gitUrl, displayUrl }`
+- `tree(loc)`, returns `{ paths, ref }` for the repo tree
+- `raw(loc, ref, file)`, returns a **CORS-enabled** URL for fetching a file
+- `source(loc, ref, dir)` and `blob(loc, ref, file)`, return URLs to view a folder or file on the host
+- `patterns(loc, ref)`, returns `{ raw, blob }` URL templates with a `{path}` placeholder
 
-Append it to the `FETCHERS` array. The endpoints you point at must allow `Access-Control-Allow-Origin: *` (the site is plain static HTML on GitHub Pages — no proxy).
+Add it to `KNOWN_HOSTS` in `scripts/indexer/hosts/index.js`.

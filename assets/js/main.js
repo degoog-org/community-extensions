@@ -1,123 +1,80 @@
-import { applyTheme, injectThemeToggle } from "./ui/theme.js";
-import { fetchStores } from "./utils/api.js";
-import { wireRefresh } from "./ui/refresh.js";
-import { loadSidebar, setActiveNav } from "./pages/index.js";
-import { renderStoreView } from "./pages/store.js";
-import { renderExtensionView } from "./pages/extension.js";
-import { wireSearch, indexStore } from "./ui/search.js";
-import { wireLightbox } from "./ui/slider.js";
-import { loadTmpl, tmpl } from "./utils/tmpl.js";
+import { sidebar } from "./components/sidebar.js";
+import { closeShot } from "./components/lightbox.js";
+import { loadCatalog } from "./core/catalog.js";
+import { SITE_NAME } from "./core/config.js";
+import { h, mount } from "./core/dom.js";
+import { logger } from "./core/logger.js";
+import { Route, extensionHref, hrefFor, parseRoute, rememberStore, replaceQuery } from "./core/router.js";
+import { lumos } from "./core/theme.js";
+import { renderBrowse } from "./views/browse.js";
+import { renderExtension } from "./views/extension.js";
+import { renderBroken, renderMissing } from "./views/missing.js";
+import { renderRepos } from "./views/repos.js";
+import { renderSubmit } from "./views/submit.js";
 
-const _parseHash = () => {
-  const hash = location.hash.replace(/^#/, "");
-  const params = new URLSearchParams(hash);
-  return {
-    repo: params.get("repo") || "",
-    ext: params.get("ext") || "",
-  };
+const VIEWS = Object.freeze({
+  [Route.BROWSE]: renderBrowse,
+  [Route.REPOS]: renderRepos,
+  [Route.EXTENSION]: renderExtension,
+  [Route.SUBMIT]: renderSubmit,
+});
+
+const FOCUS_SEARCH_KEY = "/";
+
+const main = document.getElementById("main");
+const nav = sidebar();
+let current = null;
+
+const _skeleton = () =>
+  h(
+    "div",
+    { class: "store", "aria-busy": "true" },
+    h("div", { class: "skeleton store-skel-nav" }),
+    h("div", { class: "skeleton store-skel-bar" }),
+    h("div", { class: "store-grid" }, Array.from({ length: 6 }, () => h("div", { class: "skeleton store-skel-card" }))),
+  );
+
+const _legacyHref = (route, catalog) => {
+  const repo = catalog.byInput(route.params.get("repo") || "");
+  if (!repo) return hrefFor(Route.BROWSE);
+  const ext = (route.params.get("ext") || "").replace(/^\/+|\/+$/g, "");
+  return ext ? extensionHref(`${repo.id}/${ext}`) : hrefFor(Route.BROWSE, { repos: repo.id });
 };
 
-const _mainEl = () => document.getElementById("dce-main");
-
-function _closeSidebar() {
-  const sidebar = document.querySelector(".dce-sidebar");
-  const backdrop = document.getElementById("dce-backdrop");
-  if (sidebar) sidebar.classList.remove("dce-sidebar-open");
-  if (backdrop) backdrop.style.display = "none";
-}
-
-async function _renderWelcome() {
-  const el = _mainEl();
-  if (!el) return;
-  const tpl = await loadTmpl("welcome.html");
-  el.innerHTML = tmpl(tpl, {});
+const accio = async () => {
+  const route = parseRoute();
+  nav.setActive(route.name);
+  if (route.name !== Route.SUBMIT && !current) mount(main, _skeleton());
   try {
-    const r = await fetch(
-      "https://raw.githubusercontent.com/degoog-org/awesome-degoog-extensions/main/README.md",
-    );
-    if (!r.ok) return;
-    const md = await r.text();
-    const readmeEl = el.querySelector(".dce-welcome-readme");
-    if (!readmeEl) return;
-    readmeEl.innerHTML = window.marked
-      ? window.marked.parse(md, { gfm: true, breaks: false })
-      : md.replace(/&/g, "&amp;").replace(/</g, "&lt;");
-    readmeEl.querySelectorAll("a[href]").forEach((a) => {
-      if (/^https?:/i.test(a.getAttribute("href") || "")) {
-        a.setAttribute("target", "_blank");
-        a.setAttribute("rel", "noopener noreferrer");
-      }
-    });
+    const catalog = route.name === Route.SUBMIT ? null : await loadCatalog();
+    if (route.name === Route.LEGACY) {
+      replaceQuery(_legacyHref(route, catalog));
+      return accio();
+    }
+    current?.dispose?.();
+    const view = VIEWS[route.name] ?? renderMissing;
+    current = view(main, catalog, route) ?? {};
+    if (!current.keepTitle) document.title = SITE_NAME;
   } catch (err) {
-    console.warn("welcome README render failed:", err);
+    logger.error("router", `could not render ${location.hash || "#/"}`, err);
+    current = null;
+    renderBroken(main, accio);
   }
-}
+};
 
-async function navigate() {
-  const { repo, ext } = _parseHash();
-  const el = _mainEl();
-  if (!el) return;
-  setActiveNav(repo || null);
-  if (!repo) {
-    await _renderWelcome();
-    return;
-  }
-  if (ext) {
-    await renderExtensionView(el, repo, ext);
-  } else {
-    await renderStoreView(el, repo);
-  }
-}
+const _onKey = (event) => {
+  if (event.key !== FOCUS_SEARCH_KEY || event.ctrlKey || event.metaKey || event.altKey) return;
+  if (event.target.closest("input, textarea, select, [contenteditable]")) return;
+  if (!current?.focusSearch) return;
+  event.preventDefault();
+  current.focusSearch();
+};
 
-async function boot() {
-  applyTheme();
-  injectThemeToggle();
-  wireLightbox();
-
-  const refreshBtn = document.getElementById("dce-refresh");
-  if (refreshBtn) wireRefresh(refreshBtn);
-
-  const inputs = await fetchStores();
-
-  const searchEl = document.getElementById("dce-search");
-  wireSearch(searchEl, _mainEl(), () => {
-    if (searchEl) searchEl.value = "";
-    navigate();
-  });
-
-  window.addEventListener("hashchange", () => {
-    if (searchEl) searchEl.value = "";
-    _closeSidebar();
-    navigate();
-  });
-
-  const burgerBtn = document.getElementById("dce-burger");
-  const backdrop = document.getElementById("dce-backdrop");
-  if (burgerBtn) {
-    burgerBtn.addEventListener("click", () => {
-      const sidebar = document.querySelector(".dce-sidebar");
-      if (!sidebar) return;
-      const opening = !sidebar.classList.contains("dce-sidebar-open");
-      sidebar.classList.toggle("dce-sidebar-open");
-      if (backdrop) backdrop.style.display = opening ? "block" : "none";
-    });
-  }
-  if (backdrop) backdrop.addEventListener("click", _closeSidebar);
-
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".dce-nav-item")) return;
-    _closeSidebar();
-  });
-
-  await loadSidebar(inputs, (storeInput, storeName, items) => {
-    indexStore(storeInput, storeName, items);
-  });
-
-  await navigate();
-}
-
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", boot);
-} else {
-  boot();
-}
+lumos([...document.querySelectorAll("[data-theme-toggle]")]);
+document.addEventListener("keydown", _onKey);
+window.addEventListener("hashchange", (event) => {
+  rememberStore(event.oldURL);
+  closeShot();
+  accio().then(() => window.scrollTo({ top: 0 }));
+});
+accio();

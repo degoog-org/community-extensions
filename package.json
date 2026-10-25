@@ -1,0 +1,11 @@
+{
+  "name": "degoog-community-extensions",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "index": "node scripts/indexer/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
