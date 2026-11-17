@@ -53,7 +53,9 @@ const AGO_UNITS = [
   { limit: 60, size: 1, name: "second" },
   { limit: 3600, size: 60, name: "minute" },
   { limit: 86400, size: 3600, name: "hour" },
-  { limit: Infinity, size: 86400, name: "day" },
+  { limit: 2592000, size: 86400, name: "day" },
+  { limit: 31536000, size: 2592000, name: "month" },
+  { limit: Infinity, size: 31536000, name: "year" },
 ];
 
 export const timeAgo = (iso) => {
@@ -63,3 +65,6 @@ export const timeAgo = (iso) => {
   if (unit.size === 1) return "just now";
   return `${counted(value, unit.name, `${unit.name}s`)} ago`;
 };
+
+export const fullDate = (iso) =>
+  new Date(iso).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });

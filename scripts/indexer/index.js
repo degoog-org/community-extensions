@@ -33,9 +33,14 @@ const _fallback = (previous, input) => {
   return { repo, items };
 };
 
-const _crawl = async (input, previous) => {
+const _dating = (previous) => ({
+  before: new Map((previous?.items ?? []).map((item) => [item.id, item])),
+  firstSeen: previous?.items?.some((item) => item.addedAt) ? new Date().toISOString() : null,
+});
+
+const _crawl = async (input, previous, dating) => {
   try {
-    const out = await crawlRepo(input);
+    const out = await crawlRepo(input, dating);
     logger.info("indexer", `${out.repo.displayUrl}: ${out.items.length} extensions`);
     return out;
   } catch (err) {
@@ -67,7 +72,8 @@ const hogwarts = async () => {
   const stores = await _readStores();
   const previous = await _previous();
   logger.info("indexer", `indexing ${stores.length} stores`);
-  const results = await pool(stores, STORE_CONCURRENCY, (input) => _crawl(input, previous));
+  const dating = _dating(previous);
+  const results = await pool(stores, STORE_CONCURRENCY, (input) => _crawl(input, previous, dating));
   const merged = _merge(results);
   const changed = !previous || _fingerprint(previous) !== _fingerprint(merged);
   const catalog = {

@@ -666,6 +666,11 @@ button.store-thumb {
   font-size: 0.6875rem;
 }
 
+.store-stamp::before {
+  content: "·";
+  margin-inline-end: 0.375rem;
+}
+
 .store-state-strong {
   color: var(--text-primary);
   font-weight: 500;

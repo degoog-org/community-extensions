@@ -1,5 +1,6 @@
 import { OFFICIAL_REPO_ID } from "../../assets/js/core/kinds.js";
 import { FILE_CONCURRENCY } from "./config.js";
+import { stampItem } from "./history.js";
 import { resolveRepo } from "./hosts/index.js";
 import { getJson, pool } from "./http.js";
 import { buildItem, manifestEntries } from "./items.js";
@@ -21,6 +22,9 @@ const _context = (host, loc, tree, pkg) => {
     repoId,
     author,
     paths: tree.paths,
+    dirs: tree.dirs ?? {},
+    commits: (dir, page, size) => host.commits(loc, tree.ref, dir, page, size),
+    commitDate: host.commitDate,
     raw: (file) => host.raw(loc, tree.ref, file),
     blob: (file) => host.blob(loc, tree.ref, file),
     source: (dir) => host.source(loc, tree.ref, dir),
@@ -44,7 +48,7 @@ const _repoEntry = (input, host, loc, tree, ctx, pkg, count) => ({
   itemCount: count,
 });
 
-export const crawlRepo = async (input) => {
+export const crawlRepo = async (input, dating) => {
   const resolved = await resolveRepo(input);
   if (!resolved) throw new Error("unsupported or invalid repository url");
   const { host, loc } = resolved;
@@ -54,7 +58,9 @@ export const crawlRepo = async (input) => {
   if (!pkg || typeof pkg !== "object") throw new Error(`no readable package.json in ${loc.displayUrl}`);
   const ctx = _context(host, loc, tree, pkg);
   const built = await pool(manifestEntries(pkg), FILE_CONCURRENCY, (spec) => buildItem(ctx, spec));
-  const items = built.filter(Boolean);
+  const items = await pool(built.filter(Boolean), FILE_CONCURRENCY, (item) =>
+    stampItem(ctx, item, dating.before.get(item.id), dating.firstSeen),
+  );
   return {
     repo: _repoEntry(input, host, loc, tree, ctx, pkg, items.length),
     items,

@@ -10,6 +10,8 @@ export const FILE_CONCURRENCY = 8;
 export const GITLAB_PAGE_SIZE = 100;
 export const GITLAB_MAX_PAGES = 20;
 export const GITEA_FALLBACK_REFS = ["main", "master"];
+export const HISTORY_PAGE_SIZE = 50;
+export const HISTORY_MAX_PAGES = 10;
 
 export const IMAGE_EXT = /\.(png|jpe?g|gif|webp|avif|svg)$/i;
 export const README_NAMES = ["README.md", "readme.md", "Readme.md", "README.MD"];

@@ -1,5 +1,5 @@
 import { GITEA_FALLBACK_REFS, PATH_TOKEN } from "../config.js";
-import { getJson } from "../http.js";
+import { getJson, getPage } from "../http.js";
 
 const _trim = (file) => file.replace(/^\/+/, "");
 
@@ -8,7 +8,9 @@ const _treeAt = async (base, path, ref) => {
   const data = await getJson(url);
   if (!data || !Array.isArray(data.tree)) return null;
   const paths = data.tree.filter((e) => e.type === "blob").map((e) => e.path);
-  return paths.length ? paths : null;
+  if (!paths.length) return null;
+  const dirs = Object.fromEntries(data.tree.filter((e) => e.type === "tree").map((e) => [e.path, e.sha]));
+  return { paths, dirs };
 };
 
 const _tree = async (base, path) => {
@@ -16,8 +18,8 @@ const _tree = async (base, path) => {
   const branch = meta?.default_branch || GITEA_FALLBACK_REFS[0];
   const refs = [branch, ...GITEA_FALLBACK_REFS.filter((r) => r !== branch)];
   for (const ref of refs) {
-    const paths = await _treeAt(base, path, ref);
-    if (paths) return { paths, ref };
+    const found = await _treeAt(base, path, ref);
+    if (found) return { ...found, ref };
   }
   return null;
 };
@@ -36,6 +38,11 @@ export const makeGitea = (hostname, id = "gitea", label = `Gitea (${hostname})`)
       displayUrl: `${hostname}/${path}`,
     }),
     tree: (loc) => _tree(base, loc.path),
+    commits: (loc, ref, dir, page, size) =>
+      getPage(
+        `${base}/api/v1/repos/${loc.path}/commits?sha=${encodeURIComponent(ref)}&path=${encodeURIComponent(_trim(dir))}&limit=${size}&page=${page}&stat=false&verification=false&files=false`,
+      ),
+    commitDate: (commit) => commit?.commit?.committer?.date ?? null,
     raw: (loc, ref, file) =>
       `${base}/api/v1/repos/${loc.path}/raw/${_trim(file)}?ref=${encodeURIComponent(ref)}`,
     source: (loc, ref, dir) => `${loc.webUrl}/src/branch/${ref}/${_trim(dir)}`,

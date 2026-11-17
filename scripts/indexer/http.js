@@ -28,16 +28,18 @@ const request = async (url, headers = {}) => {
   return null;
 };
 
-export const getJson = async (url, headers) => {
+export const getPage = async (url, headers) => {
   const res = await request(url, headers);
   if (!res) return null;
   try {
-    return await res.json();
+    return { data: await res.json(), headers: res.headers };
   } catch (err) {
     logger.warn("http", `invalid json at ${url}`, err);
     return null;
   }
 };
+
+export const getJson = async (url, headers) => (await getPage(url, headers))?.data ?? null;
 
 export const getText = async (url, headers) => {
   const res = await request(url, headers);

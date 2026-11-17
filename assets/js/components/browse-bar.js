@@ -2,6 +2,7 @@ import { h, mount } from "../core/dom.js";
 import { ALL_KINDS, kindSubtypes, passes } from "../core/filters.js";
 import { ITEM_KINDS } from "../core/kinds.js";
 import { extensionsCount, kindsLabel, subtypeLabel } from "../core/labels.js";
+import { SORT_KEYS, SortKey, sortLabel } from "../core/sort.js";
 import { filterSearch, filterSelect, filterSummary, filterTabs, filterToggle, revealTab } from "./filter-parts.js";
 import { repoFilter } from "./repo-filter.js";
 
@@ -32,6 +33,15 @@ const _subSelect = (catalog, state, actions) => {
     ],
   });
 };
+
+const _sortSelect = (state, actions) =>
+  filterSelect({
+    label: "Sort by",
+    value: state.sort,
+    active: state.sort !== SortKey.NAME,
+    onChange: actions.setSort,
+    options: SORT_KEYS.map((sort) => ({ value: sort, label: sortLabel(sort) })),
+  });
 
 const _tabs = (catalog, state, actions) => {
   const scoped = catalog.items.filter((item) => passes(state, item, false));
@@ -92,7 +102,8 @@ export const browseBar = (catalog, state, actions) => {
   });
   const toggleSlot = h("span", { class: "filter-toggle-slot" });
   const subSlot = h("span", { class: "filter-sub-slot" });
-  const selects = h("div", { class: "filter-selects", id: SELECTS_ID }, subSlot, repos.el);
+  const sortSlot = h("span", { class: "filter-sort-slot" });
+  const selects = h("div", { class: "filter-selects", id: SELECTS_ID }, subSlot, repos.el, sortSlot);
   const tabsSlot = h("div");
   const summarySlot = h("div");
   const bar = h(
@@ -107,7 +118,7 @@ export const browseBar = (catalog, state, actions) => {
     mount(
       toggleSlot,
       filterToggle({
-        active: [current.sub, current.repos.length].filter(Boolean).length,
+        active: [current.sub, current.repos.length, current.sort !== SortKey.NAME].filter(Boolean).length,
         open,
         controls: SELECTS_ID,
         onToggle: () => {
@@ -124,6 +135,7 @@ export const browseBar = (catalog, state, actions) => {
     mount(subSlot, _subSelect(catalog, current, actions));
     subSlot.hidden = !subSlot.childElementCount;
     repos.update({ selected: current.repos, counts: _repoCounts(catalog, current) });
+    mount(sortSlot, _sortSelect(current, actions));
     mount(tabsSlot, _tabs(catalog, current, actions));
     mount(summarySlot, _summary(catalog, current, count, actions));
     revealTab(tabsSlot.firstElementChild, focusTab);

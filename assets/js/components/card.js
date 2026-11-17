@@ -2,6 +2,7 @@ import { h, icon } from "../core/dom.js";
 import { ItemKind } from "../core/kinds.js";
 import { KIND_ICONS, itemSubLabel } from "../core/labels.js";
 import { extensionHref } from "../core/router.js";
+import { itemStamp } from "../core/sort.js";
 import { retryOnce } from "./avatar.js";
 import { keycaps } from "./keycaps.js";
 import { openShots } from "./lightbox.js";
@@ -39,7 +40,17 @@ const _meta = (item) => {
   return parts.join(" · ");
 };
 
-export const itemCard = (item) =>
+const _state = (item, sort) => {
+  const stamp = itemStamp(item, sort);
+  return h(
+    "span",
+    { class: "store-state" },
+    `v${item.version}`,
+    stamp ? h("time", { class: "store-stamp", datetime: stamp.at, title: stamp.title }, stamp.text) : null,
+  );
+};
+
+export const itemCard = (item, sort) =>
   h(
     "article",
     { class: "store-card" },
@@ -54,7 +65,7 @@ export const itemCard = (item) =>
     h(
       "div",
       { class: "store-card-foot" },
-      h("span", { class: "store-state" }, `v${item.version}`),
+      _state(item, sort),
       h(
         "span",
         { class: "store-actions" },

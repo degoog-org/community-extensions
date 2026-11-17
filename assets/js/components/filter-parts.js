@@ -55,10 +55,10 @@ export const filterToggle = ({ active, open, controls, onToggle }) =>
     h("span", { class: "filter-toggle-n" }, active ? String(active) : ""),
   );
 
-export const filterSelect = ({ label, options, value, onChange }) =>
+export const filterSelect = ({ label, options, value, active = Boolean(value), onChange }) =>
   h(
     "span",
-    { class: value ? "degoog-select-wrap filter-select filter-select--set" : "degoog-select-wrap filter-select" },
+    { class: active ? "degoog-select-wrap filter-select filter-select--set" : "degoog-select-wrap filter-select" },
     h(
       "select",
       { class: "degoog-select", "aria-label": label, onChange: (event) => onChange(event.currentTarget.value) },

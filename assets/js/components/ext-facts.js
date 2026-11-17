@@ -1,5 +1,5 @@
 import { externalLink, h, icon } from "../core/dom.js";
-import { kindLabel, subtypeLabel } from "../core/labels.js";
+import { fullDate, kindLabel, subtypeLabel, timeAgo } from "../core/labels.js";
 import { copyText } from "./flash.js";
 import { keycaps } from "./keycaps.js";
 
@@ -60,6 +60,10 @@ export const installPanel = (item, repo) =>
         ),
   );
 
+const _when = (iso) => (iso ? h("time", { datetime: iso, title: fullDate(iso) }, timeAgo(iso)) : null);
+
+const _dateRow = (label, iso) => (iso ? _row(label, _when(iso)) : null);
+
 const _types = (item) =>
   item.subtypes.length ? _row(item.subtypes.length > 1 ? "Types" : "Type", item.subtypes.map((s) => subtypeLabel(item.kind, s)).join(", ")) : null;
 
@@ -71,6 +75,8 @@ export const factsPanel = (item, repo) =>
       "dl",
       { class: "ext-facts" },
       _row("Version", `v${item.version}`),
+      _dateRow("Added", item.addedAt),
+      _dateRow("Updated", item.updatedAt),
       _row("Kind", kindLabel(item.kind)),
       _types(item),
       item.shortcut ? _row("Binding", keycaps(item.shortcut, "ext-fact-keys")) : null,

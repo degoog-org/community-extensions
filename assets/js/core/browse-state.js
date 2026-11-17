@@ -1,8 +1,9 @@
 import { ALL_KINDS, hasSubtypes, isKind } from "./filters.js";
+import { SortKey, isSort } from "./sort.js";
 
 const REPO_SEPARATOR = ",";
 
-export const emptyBrowse = () => ({ q: "", kind: ALL_KINDS, sub: "", repos: [] });
+export const emptyBrowse = () => ({ q: "", kind: ALL_KINDS, sub: "", repos: [], sort: SortKey.NAME });
 
 export const browseFromParams = (params, catalog) => {
   const kind = isKind(params.get("kind")) ? params.get("kind") : ALL_KINDS;
@@ -14,6 +15,7 @@ export const browseFromParams = (params, catalog) => {
     kind,
     sub: hasSubtypes(kind) ? params.get("sub") || "" : "",
     repos,
+    sort: isSort(params.get("sort")) ? params.get("sort") : SortKey.NAME,
   };
 };
 
@@ -22,4 +24,5 @@ export const browseToParams = (state) => ({
   kind: state.kind === ALL_KINDS ? "" : state.kind,
   sub: state.sub,
   repos: state.repos.join(REPO_SEPARATOR),
+  sort: state.sort === SortKey.NAME ? "" : state.sort,
 });

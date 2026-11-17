@@ -6,8 +6,13 @@ import { SEARCH_DEBOUNCE_MS } from "../core/config.js";
 import { h, mount } from "../core/dom.js";
 import { ALL_KINDS, isFiltered, passes } from "../core/filters.js";
 import { Route, hrefFor, replaceQuery } from "../core/router.js";
+import { SortKey, sortItems } from "../core/sort.js";
 
-const _list = (catalog, state) => catalog.items.filter((item) => passes(state, item));
+const _list = (catalog, state) =>
+  sortItems(
+    catalog.items.filter((item) => passes(state, item)),
+    state.sort,
+  );
 
 export const renderBrowse = (root, catalog, route) => {
   let state = browseFromParams(route.params, catalog);
@@ -16,15 +21,20 @@ export const renderBrowse = (root, catalog, route) => {
 
   const paint = (focusTab = false) => {
     const list = _list(catalog, state);
+    const preview = state.kind === ALL_KINDS && !state.q.trim() && state.sort === SortKey.NAME;
     bar.update(state, list.length, focusTab);
     mount(
       resultsSlot,
       results({
         list,
         q: state.q,
-        preview: state.kind === ALL_KINDS && !state.q.trim(),
+        kind: state.kind,
+        sort: state.sort,
+        preview,
+        recent: preview && !isFiltered(state),
         filtered: isFiltered(state),
         onShowAll: (kind) => actions.setKind(kind, false, true),
+        onSort: (sort) => actions.setSort(sort, true),
         onClear: actions.clear,
       }),
     );
@@ -46,7 +56,8 @@ export const renderBrowse = (root, catalog, route) => {
     setKind: (kind, focus, scroll) => commit({ kind, sub: "" }, focus, scroll),
     setSub: (sub) => commit({ sub }),
     setRepos: (repos) => commit({ repos }),
-    clear: () => commit({ ...emptyBrowse(), kind: state.kind }),
+    setSort: (sort, scroll = false) => commit({ sort }, false, scroll),
+    clear: () => commit({ ...emptyBrowse(), kind: state.kind, sort: state.sort }),
   };
 
   const bar = browseBar(catalog, state, actions);

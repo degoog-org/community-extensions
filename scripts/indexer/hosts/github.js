@@ -1,5 +1,5 @@
 import { GITHUB_TOKEN, PATH_TOKEN } from "../config.js";
-import { getJson } from "../http.js";
+import { getJson, getPage } from "../http.js";
 
 const API = "https://api.github.com";
 const RAW = "https://raw.githubusercontent.com";
@@ -26,8 +26,15 @@ export const github = {
     const data = await getJson(`${API}/repos/${loc.path}/git/trees/HEAD?recursive=1`, _headers());
     if (!data || !Array.isArray(data.tree)) return null;
     const paths = data.tree.filter((e) => e.type === "blob").map((e) => e.path);
-    return paths.length ? { paths, ref: "HEAD" } : null;
+    const dirs = Object.fromEntries(data.tree.filter((e) => e.type === "tree").map((e) => [e.path, e.sha]));
+    return paths.length ? { paths, dirs, ref: "HEAD" } : null;
   },
+  commits: (loc, _ref, dir, page, size) =>
+    getPage(
+      `${API}/repos/${loc.path}/commits?path=${encodeURIComponent(_trim(dir))}&per_page=${size}&page=${page}`,
+      _headers(),
+    ),
+  commitDate: (commit) => commit?.commit?.committer?.date ?? null,
   raw: (loc, ref, file) => `${RAW}/${loc.path}/${ref}/${_trim(file)}`,
   source: (loc, _ref, dir) => `${loc.webUrl}/tree/HEAD/${_trim(dir)}`,
   blob: (loc, _ref, file) => `${loc.webUrl}/blob/HEAD/${_trim(file)}`,
